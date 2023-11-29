@@ -1,0 +1,52 @@
+---
+title: "Securing Spring Boot Microservice using Keycloak and Testcontainers"
+date: 2023-11-30T09:39:58+05:30
+draft: false
+description: This guide will explain how to secure Spring Boot Microservices using Keycloak and Testcontainers.
+repo: https://github.com/testcontainers/tc-guide-securing-spring-boot-microservice-using-keycloak-and-testcontainers
+languages:
+  - Java
+tags:
+  - spring-boot
+  - security
+  - keycloak
+---
+:toc:
+:toclevels: 2
+:codebase: https://raw.githubusercontent.com/testcontainers/tc-guide-securing-spring-boot-microservice-using-keycloak-and-testcontainers/main
+
+In this guide, you will learn how to
+
+* Create an OAuth 2.0 Resource Server using Spring Boot
+* Secure the API endpoints using Keycloak
+* Test the APIs using Testcontainers Keycloak module
+* Run the application locally using Testcontainers Keycloak module
+
+== Prerequisites
+* Java 17+
+* Your favorite IDE (Intellij IDEA, Eclipse, NetBeans, VS Code)
+* A Docker environment supported by Testcontainers https://java.testcontainers.org/supported_docker_environment/
+
+== What we are going to achieve in this guide
+
+== Getting Started
+
+== Run tests
+
+[source,shell]
+----
+# If you are using Maven
+./mvnw test
+
+# If you are using Gradle
+./gradlew test
+----
+
+== Summary
+
+To learn more about Testcontainers visit http://testcontainers.com
+
+== Further Reading
+* https://testcontainers.com/guides/testing-spring-boot-kafka-listener-using-testcontainers/[Testing Spring Boot Kafka Listener using Testcontainers]
+* https://testcontainers.com/guides/getting-started-with-testcontainers-for-java/[Getting started with Testcontainers for Java]
+* https://www.testcontainers.org/modules/localstack/[Testcontainers LocalStack Module]
