@@ -7,6 +7,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
+
     static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:23.0.1";
     static String realmImportFile = "/keycloaktcdemo-realm.json";
     static String realmName = "keycloaktcdemo";
@@ -14,11 +15,11 @@ public class ContainersConfig {
     @Bean
     KeycloakContainer keycloak(DynamicPropertyRegistry registry) {
         var keycloak = new KeycloakContainer(KEYCLOAK_IMAGE)
-                .withRealmImportFile(realmImportFile)
-                .withReuse(true);
+            .withRealmImportFile(realmImportFile);
         registry.add(
-                "spring.security.oauth2.resourceserver.jwt.issuer-uri",
-                () -> keycloak.getAuthServerUrl() + "/realms/" + realmName);
+            "spring.security.oauth2.resourceserver.jwt.issuer-uri",
+            () -> keycloak.getAuthServerUrl() + "/realms/" + realmName
+        );
         return keycloak;
     }
 }

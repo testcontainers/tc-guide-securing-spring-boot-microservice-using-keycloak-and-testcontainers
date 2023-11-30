@@ -26,9 +26,9 @@ import org.springframework.web.client.RestTemplate;
 @Import(ContainersConfig.class)
 class ProductControllerTests {
 
-    public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
-    public static final String CLIENT_ID = "product-service";
-    public static final String CLIENT_SECRET = "jTJJqdzeCSt3DmypfHZa42vX8U9rQKZ9";
+    static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    static final String CLIENT_ID = "product-service";
+    static final String CLIENT_SECRET = "jTJJqdzeCSt3DmypfHZa42vX8U9rQKZ9";
 
     @LocalServerPort
     private int port;
@@ -48,37 +48,41 @@ class ProductControllerTests {
 
     @Test
     void shouldGetUnauthorizedWhenCreateProductWithoutAuthToken() {
-        given().contentType("application/json")
-                .body(
-                        """
+        given()
+            .contentType("application/json")
+            .body(
+                """
                     {
                         "title": "New Product",
                         "description": "Brand New Product"
                     }
-                """)
-                .when()
-                .post("/api/products")
-                .then()
-                .statusCode(401);
+                """
+            )
+            .when()
+            .post("/api/products")
+            .then()
+            .statusCode(401);
     }
 
     @Test
     void shouldCreateProductWithAuthToken() {
         String token = getToken();
 
-        given().header("Authorization", "Bearer " + token)
-                .contentType("application/json")
-                .body(
-                        """
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType("application/json")
+            .body(
+                """
                     {
                         "title": "New Product",
                         "description": "Brand New Product"
                     }
-                """)
-                .when()
-                .post("/api/products")
-                .then()
-                .statusCode(201);
+                """
+            )
+            .when()
+            .post("/api/products")
+            .then()
+            .statusCode(201);
     }
 
     private String getToken() {
@@ -92,10 +96,15 @@ class ProductControllerTests {
         map.put("client_secret", singletonList(CLIENT_SECRET));
 
         String authServerUrl =
-                oAuth2ResourceServerProperties.getJwt().getIssuerUri() + "/protocol/openid-connect/token";
+            oAuth2ResourceServerProperties.getJwt().getIssuerUri() +
+            "/protocol/openid-connect/token";
 
         var request = new HttpEntity<>(map, httpHeaders);
-        KeyCloakToken token = restTemplate.postForObject(authServerUrl, request, KeyCloakToken.class);
+        KeyCloakToken token = restTemplate.postForObject(
+            authServerUrl,
+            request,
+            KeyCloakToken.class
+        );
 
         assert token != null;
         return token.accessToken();

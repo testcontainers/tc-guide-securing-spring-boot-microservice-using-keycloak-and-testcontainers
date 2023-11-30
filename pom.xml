@@ -85,9 +85,18 @@
                     <java>
                         <importOrder />
                         <removeUnusedImports />
-                        <palantirJavaFormat>
-                            <version>2.38.0</version>
-                        </palantirJavaFormat>
+                        <prettier>
+                            <devDependencies>
+                                <prettier>3.0.3</prettier>
+                                <prettier-plugin-java>2.3.0</prettier-plugin-java>
+                            </devDependencies>
+                            <config>
+                                <parser>java</parser>
+                                <tabWidth>4</tabWidth>
+                                <printWidth>80</printWidth>
+                                <plugins>prettier-plugin-java</plugins>
+                            </config>
+                        </prettier>
                         <formatAnnotations />
                     </java>
                 </configuration>

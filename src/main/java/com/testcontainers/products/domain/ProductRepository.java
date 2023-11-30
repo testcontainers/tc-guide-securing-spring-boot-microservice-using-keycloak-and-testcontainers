@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ProductRepository {
+
     private static final AtomicLong ID = new AtomicLong(0L);
     private static final List<Product> PRODUCTS = new ArrayList<>();
 
@@ -15,7 +16,11 @@ public class ProductRepository {
     }
 
     public Product create(Product product) {
-        Product p = new Product(ID.incrementAndGet(), product.title(), product.description());
+        Product p = new Product(
+            ID.incrementAndGet(),
+            product.title(),
+            product.description()
+        );
         PRODUCTS.add(p);
         return p;
     }
