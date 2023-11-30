@@ -7,7 +7,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
-    static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:23.0";
+    static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:23.0.1";
     static String realmImportFile = "/keycloaktcdemo-realm.json";
     static String realmName = "keycloaktcdemo";
 
