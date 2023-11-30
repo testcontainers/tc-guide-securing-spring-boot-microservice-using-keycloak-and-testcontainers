@@ -1,4 +1,4 @@
-package com.testcontainers.messages;
+package com.testcontainers.products.api;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.testcontainers.products.ContainersConfig;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(ContainersConfig.class)
-class ApplicationTests {
+class ProductControllerTests {
 
     @LocalServerPort
     private int port;
@@ -37,12 +38,12 @@ class ApplicationTests {
     }
 
     @Test
-    void shouldGetMessagesWithoutAuthToken() {
-        when().get("/api/messages").then().statusCode(200);
+    void shouldGetProductsWithoutAuthToken() {
+        when().get("/api/products").then().statusCode(200);
     }
 
     @Test
-    void shouldCreateMessageWithAuthToken() {
+    void shouldCreateProductWithAuthToken() {
         String token = getToken();
 
         given().header("Authorization", "Bearer " + token)
@@ -50,12 +51,12 @@ class ApplicationTests {
                 .body(
                         """
                     {
-                        "content": "Test Message",
-                        "createdBy": "admin"
+                        "title": "New Product",
+                        "description": "Brand New Product"
                     }
                 """)
                 .when()
-                .get("/api/messages")
+                .get("/api/products")
                 .then()
                 .statusCode(200);
     }

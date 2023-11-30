@@ -1,4 +1,4 @@
-package com.testcontainers.messages;
+package com.testcontainers.products;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
 @TestConfiguration(proxyBeanMethods = false)
-class ContainersConfig {
+public class ContainersConfig {
     static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:23.0";
     static String realmImportFile = "/keycloaktcdemo-realm.json";
     static String realmName = "keycloaktcdemo";

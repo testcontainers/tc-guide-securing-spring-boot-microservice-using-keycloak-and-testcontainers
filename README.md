@@ -3,7 +3,7 @@
 This is sample code for [Securing Spring Boot Microservice using Keycloak and Testcontainers](https://testcontainers.com/guides/securing-spring-boot-microservice-using-keycloak-and-testcontainers) guide.
 
 ## 1. Setup Environment
-Make sure you have Java 8+ and a [compatible Docker environment](https://www.testcontainers.org/supported_docker_environment/) installed.
+Make sure you have Java 8+ and a [compatible Docker environment](https://java.testcontainers.org/supported_docker_environment/) installed.
 If you are going to use Maven build tool then make sure Java 17+ is installed.
 
 For example:

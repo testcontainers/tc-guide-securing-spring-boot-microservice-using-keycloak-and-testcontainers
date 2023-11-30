@@ -1,4 +1,4 @@
-package com.testcontainers.messages;
+package com.testcontainers.products;
 
 import org.springframework.boot.SpringApplication;
 

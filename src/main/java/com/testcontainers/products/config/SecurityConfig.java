@@ -1,4 +1,4 @@
-package com.testcontainers.messages.config;
+package com.testcontainers.products.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -18,9 +18,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/api/messages")
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/api/products")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/messages")
+                        .requestMatchers(HttpMethod.POST, "/api/products")
                         .authenticated()
                         .anyRequest()
                         .authenticated())
