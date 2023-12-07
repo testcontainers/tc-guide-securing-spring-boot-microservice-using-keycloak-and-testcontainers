@@ -22,6 +22,8 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
@@ -29,6 +31,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
     testImplementation 'com.github.dasniko:testcontainers-keycloak:3.2.0'
     testImplementation 'io.rest-assured:rest-assured'
 }
@@ -49,7 +52,7 @@ spotless {
         prettier(['prettier': '3.0.3', 'prettier-plugin-java': '2.3.0'])
             .config([
                     'parser': 'java',
-                    'tabWidth': 4,
+                    'tabWidth': 2,
                     'printWidth': 80,
                     'plugins': ['prettier-plugin-java']
             ])

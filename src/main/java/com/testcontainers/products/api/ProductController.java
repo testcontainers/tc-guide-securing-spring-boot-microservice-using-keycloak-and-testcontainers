@@ -16,20 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/products")
 class ProductController {
 
-    private final ProductRepository productRepository;
+  private final ProductRepository productRepository;
 
-    ProductController(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+  ProductController(ProductRepository productRepository) {
+    this.productRepository = productRepository;
+  }
 
-    @GetMapping
-    List<Product> getAll() {
-        return productRepository.getAll();
-    }
+  @GetMapping
+  List<Product> getAll() {
+    return productRepository.getAll();
+  }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    Product createProduct(@RequestBody @Valid Product product) {
-        return productRepository.create(product);
-    }
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  Product createProduct(@RequestBody @Valid Product product) {
+    return productRepository.create(product);
+  }
 }

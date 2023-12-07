@@ -26,89 +26,89 @@ import org.springframework.web.client.RestTemplate;
 @Import(ContainersConfig.class)
 class ProductControllerTests {
 
-    static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
-    static final String CLIENT_ID = "product-service";
-    static final String CLIENT_SECRET = "jTJJqdzeCSt3DmypfHZa42vX8U9rQKZ9";
+  static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+  static final String CLIENT_ID = "product-service";
+  static final String CLIENT_SECRET = "jTJJqdzeCSt3DmypfHZa42vX8U9rQKZ9";
 
-    @LocalServerPort
-    private int port;
+  @LocalServerPort
+  private int port;
 
-    @Autowired
-    OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
+  @Autowired
+  OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
 
-    @BeforeEach
-    void setup() {
-        RestAssured.port = port;
-    }
+  @BeforeEach
+  void setup() {
+    RestAssured.port = port;
+  }
 
-    @Test
-    void shouldGetProductsWithoutAuthToken() {
-        when().get("/api/products").then().statusCode(200);
-    }
+  @Test
+  void shouldGetProductsWithoutAuthToken() {
+    when().get("/api/products").then().statusCode(200);
+  }
 
-    @Test
-    void shouldGetUnauthorizedWhenCreateProductWithoutAuthToken() {
-        given()
-            .contentType("application/json")
-            .body(
-                """
-                    {
-                        "title": "New Product",
-                        "description": "Brand New Product"
-                    }
-                """
-            )
-            .when()
-            .post("/api/products")
-            .then()
-            .statusCode(401);
-    }
+  @Test
+  void shouldGetUnauthorizedWhenCreateProductWithoutAuthToken() {
+    given()
+      .contentType("application/json")
+      .body(
+        """
+            {
+                "title": "New Product",
+                "description": "Brand New Product"
+            }
+        """
+      )
+      .when()
+      .post("/api/products")
+      .then()
+      .statusCode(401);
+  }
 
-    @Test
-    void shouldCreateProductWithAuthToken() {
-        String token = getToken();
+  @Test
+  void shouldCreateProductWithAuthToken() {
+    String token = getToken();
 
-        given()
-            .header("Authorization", "Bearer " + token)
-            .contentType("application/json")
-            .body(
-                """
-                    {
-                        "title": "New Product",
-                        "description": "Brand New Product"
-                    }
-                """
-            )
-            .when()
-            .post("/api/products")
-            .then()
-            .statusCode(201);
-    }
+    given()
+      .header("Authorization", "Bearer " + token)
+      .contentType("application/json")
+      .body(
+        """
+            {
+                "title": "New Product",
+                "description": "Brand New Product"
+            }
+        """
+      )
+      .when()
+      .post("/api/products")
+      .then()
+      .statusCode(201);
+  }
 
-    private String getToken() {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+  private String getToken() {
+    RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.put("grant_type", singletonList(GRANT_TYPE_CLIENT_CREDENTIALS));
-        map.put("client_id", singletonList(CLIENT_ID));
-        map.put("client_secret", singletonList(CLIENT_SECRET));
+    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+    map.put("grant_type", singletonList(GRANT_TYPE_CLIENT_CREDENTIALS));
+    map.put("client_id", singletonList(CLIENT_ID));
+    map.put("client_secret", singletonList(CLIENT_SECRET));
 
-        String authServerUrl =
-            oAuth2ResourceServerProperties.getJwt().getIssuerUri() +
-            "/protocol/openid-connect/token";
+    String authServerUrl =
+      oAuth2ResourceServerProperties.getJwt().getIssuerUri() +
+      "/protocol/openid-connect/token";
 
-        var request = new HttpEntity<>(map, httpHeaders);
-        KeyCloakToken token = restTemplate.postForObject(
-            authServerUrl,
-            request,
-            KeyCloakToken.class
-        );
+    var request = new HttpEntity<>(map, httpHeaders);
+    KeyCloakToken token = restTemplate.postForObject(
+      authServerUrl,
+      request,
+      KeyCloakToken.class
+    );
 
-        assert token != null;
-        return token.accessToken();
-    }
+    assert token != null;
+    return token.accessToken();
+  }
 
-    record KeyCloakToken(@JsonProperty("access_token") String accessToken) {}
+  record KeyCloakToken(@JsonProperty("access_token") String accessToken) {}
 }

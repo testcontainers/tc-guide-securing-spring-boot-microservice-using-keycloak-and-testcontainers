@@ -1,6 +1,6 @@
 ---
 title: "Securing Spring Boot Microservice using Keycloak and Testcontainers"
-date: 2023-11-30T09:39:58+05:30
+date: 2023-12-07T09:39:58+05:30
 draft: false
 description: This guide will explain how to secure Spring Boot Microservices using Keycloak and Testcontainers.
 repo: https://github.com/testcontainers/tc-guide-securing-spring-boot-microservice-using-keycloak-and-testcontainers
@@ -28,8 +28,188 @@ In this guide, you will learn how to
 * A Docker environment supported by Testcontainers https://java.testcontainers.org/supported_docker_environment/
 
 == What we are going to achieve in this guide
+We are going to create a Spring Boot application as an OAuth 2.0 Resource Server, and we are going to secure it using Keycloak.
+We will implement an API endpoint to create a new product and configure Spring Security to protect the API endpoint using
+OAuth 2.0 JWT token-based authorization.
+
+We will explore how to use the https://testcontainers.com/modules/keycloak/[Testcontainers Keycloak module]
+for testing the API endpoint and also for local development.
 
 == Getting Started
+We can use Spring Security OAuth 2 features to create a https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html[Spring Boot OAuth 2.0 Resource Server], and protect it using
+OAuth Service Providers like *Keycloak*, *Okta*, *Auth0*, etc.
+In this guide, we are going to use https://www.keycloak.org/[Keycloak] which is an open-source Identity and Access Management solution.
+
+Let's create a Spring Boot application from https://start.spring.io/[Spring Initializr] by selecting
+*Spring Web*, *Validation*, *JDBC API*, *PostgreSQL Driver*, *Spring Security*, *OAuth2 Resource Server*, and *Testcontainers* starters.
+
+We are going to use the https://github.com/dasniko/testcontainers-keycloak[testcontainers-keycloak] module for testing
+and running the application locally as well.
+Also, we are going to use https://rest-assured.io/[REST Assured] for testing the API endpoints.
+So, once the application is generated, add the following dependencies with *test* scope:
+
+[source,groovy]
+----
+testImplementation 'com.github.dasniko:testcontainers-keycloak:3.2.0'
+testImplementation 'io.rest-assured:rest-assured'
+----
+
+== Implement API endpoints
+Let's implement the API endpoints to fetch all products and create a new product.
+But first create the *Product* domain class as follows:
+
+[source,java]
+----
+include::{codebase}/src/main/java/com/testcontainers/products/domain/Product.java[]
+----
+
+Implement *ProductRepository* using Spring JdbcClient with PostgreSQL database as follows:
+
+[source,java]
+----
+include::{codebase}/src/main/java/com/testcontainers/products/domain/ProductRepository.java[]
+----
+
+Let's create a file with the name *schema.sql* under the *src/main/resources* directory
+to create the *products* table.
+
+[source,sql]
+----
+include::{codebase}/src/main/resources/schema.sql[]
+----
+
+To enable database schema initialization, add the following property in *src/main/resources/application.properties* file.
+
+[source,properties]
+----
+spring.sql.init.mode=always
+----
+
+For real-world applications, it is recommended to use database migration tools like *FlywayDb* or *Liquibase*.
+
+Now, let's implement *ProductController* with the API handlers as follows:
+
+[source,java]
+----
+include::{codebase}/src/main/java/com/testcontainers/products/api/ProductController.java[]
+----
+
+== Configure OAuth Security
+We are going to protect the Resource Server API endpoints using OAuth 2 JWT Token-based authentication using Spring Security.
+
+Create *SecurityConfig* class with the following content:
+
+[source,java]
+----
+include::{codebase}/src/main/java/com/testcontainers/products/config/SecurityConfig.java[]
+----
+
+In this configuration class, we have configured the following:
+
+* Enabled access to *GET /api/products* endpoint for unauthorized users as well.
+* The *POST /api/products* endpoint is configured to be accessed only by authenticated users.
+* The OAuth 2 Resource Server is protected using JWT token-based authentication with default configuration.
+
+Now let's assume Keycloak is running on port 9090, and the realm name is *keycloaktcdemo*
+then we need to configure the OAuth JWT Token Issuer URL in *application.properties* as follows:
+
+[source,properties]
+----
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:9090/realms/keycloaktcdemo
+----
+
+Now we have everything configured, but we are assuming that Keycloak is already running and
+the realm *keycloaktcdemo* is configured.
+But we should be able to just clone the code repository and run the tests so that
+all the test infrastructure will be provisioned automatically.
+
+To make the tests "self-contained", we are going to export the realm configuration,
+and then use the https://testcontainers.com/modules/keycloak/[Testcontainers Keycloak module]
+to automatically start a Keycloak instance and run the tests against it.
+
+== Export Keycloak Realm Configuration
+We are going to do a one-time setup of starting a Keycloak instance using Docker, configure the realm, and then export the real configuration as a JSON file.
+
+Start the Keycloak server using Docker as follows:
+
+[source,shell]
+----
+$ docker run -p 9090:8080 \
+    -e KEYCLOAK_ADMIN=admin \
+    -e KEYCLOAK_ADMIN_PASSWORD=admin \
+    quay.io/keycloak/keycloak:23.0.1 start-dev
+----
+
+Now you can go to http://localhost:9090 and login into Admin Console using the credentials *admin/admin*.
+After logging into the Admin Console, setup realm and *product-service* client as follows:
+
+* In the top-left corner, there is a realm drop-down, which provides the option to create a new realm. Create a new realm with the name *keycloaktcdemo*.
+* Under the keycloaktcdemo realm, create a new client with by providing the following details:
+    * *Client ID*: *product-service*
+    * *Client Authentication*: *On*
+    * *Authentication flow*: select only *Service accounts roles*
+* Now under the *Client details* screen, go to the *Credentials* tab and copy the *Client secret* value.
+
+We have registered the *product-service* as a client and enabled *Client Credentials flow*.
+The other systems can get an Access Token using *Client ID* and *Client Secret*.
+
+Now export the *keycloaktcdemo* realm using the following commands:
+
+[source,shell]
+----
+$ docker ps
+# copy the keycloak container id
+
+# ssh into keycloak container
+$ docker exec -it <container-id> /bin/bash
+
+# export the realm configuration
+$ /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import --realm keycloaktcdemo
+
+# exit from the container
+$ exit
+
+# copy the exported realm configuration to local machine
+$ docker cp <container-id>:/opt/keycloak/data/import/keycloaktcdemo-realm.json ~/Downloads/keycloaktcdemo-realm.json
+----
+
+Copy the *keycloaktcdemo-realm.json* file into *src/test/resources* folder.
+
+== Testing the API endpoints
+Spring Boot 3.1.0 introduced out-of-the-box support for Testcontainers which not only simplified testing, but we can use Testcontainers for local development as well.
+To learn more, please read https://www.atomicjar.com/2023/05/spring-boot-3-1-0-testcontainers-for-testing-and-local-development/[Spring Boot Application Testing and Development with Testcontainers].
+
+As of Spring Boot 3.2.0, *ServiceConnection* support is not available for Keycloak.
+But there is support for https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.testing.testcontainers.at-development-time.dynamic-properties[Contributing Dynamic Properties at Development Time].
+So, we can configure *KeycloakContainer* as a bean and register the JWT Issuer URI property using *DynamicPropertyRegistry*.
+
+Create *ContainersConfig* class under *src/test/java* with the following content:
+
+[source,java]
+----
+include::{codebase}/src/test/java/com/testcontainers/products/ContainersConfig.java[]
+----
+
+We registered a bean of type *PostgreSQLContainer* and also added *@ServiceConnection* annotation
+which will start a PostgreSQL container and automatically register the DataSource properties.
+
+Next, we are registering a bean of type *KeycloakContainer* using the Docker image
+*quay.io/keycloak/keycloak:23.0.1* and importing the realm configuration file.
+Then we are registering the dynamic JWT Issuer URI using *DynamicPropertyRegistry*
+by fetching the AuthServerUrl from the Keycloak container instance.
+
+Now create *ProductControllerTests* class for testing the API endpoints as follows:
+
+[source,java]
+----
+include::{codebase}/src/test/java/com/testcontainers/products/api/ProductControllerTests.java[]
+----
+
+Let's understand what is going on in this test class:
+
+* We have the *shouldGetProductsWithoutAuthToken()* test which invokes the *GET /api/products* endpoint without adding *Authentication* header. As this API endpoint is configured to be accessible without any authentication, we should be able to get the response successfully.
+* Next, we have *shouldGetUnauthorizedWhenCreateProductWithoutAuthToken()* test in which we are invoking the secured *POST /api/products* endpoint without *Authorization* header and asserting the response status code to be 401 i.e, Unauthorized.
+* Finally, we have *shouldCreateProductWithAuthToken()* test in which we first got the *access_token* using Client Credentials flow. We have added the token as a Bearer token in the Authorization header while invoking *POST /api/products* endpoint and asserting the response status code to be 201 i.e, Created.
 
 == Run tests
 
@@ -42,11 +222,33 @@ In this guide, you will learn how to
 ./gradlew test
 ----
 
+You should see the Keycloak Docker container is started with the realm settings imported and the tests should PASS.
+You can also notice that after the tests are executed, the containers are stopped and removed automatically.
+
+== Local Development
+As mentioned earlier, Spring Boot's Testcontainers support can be used for local development as well.
+We can reuse the *ContainersConfig* test configuration class and create *TestApplication* class
+under *src/test/java* as follows:
+
+[source,java]
+----
+include::{codebase}/src/test/java/com/testcontainers/products/TestApplication.java[]
+----
+
+During the development, instead of running the *Application.java* under *src/main/java*,
+we can run *TestApplication.java* under *src/test/java* which automatically starts the containers
+defined in *ContainersConfig* class and configures the application to use the dynamically registered properties.
+
+Now you can run locally simply by running the *TestApplication.java* from your IDE
+without having to manually install and configure the dependent services like PostgreSQL and Keycloak.
+
 == Summary
+The Testcontainers Keycloak module enables developing and testing applications using Keycloak without using mocks.
+This will bring more confidence in our tests as we are using a real Keycloak server that resembles the production setup.
 
 To learn more about Testcontainers visit http://testcontainers.com
 
 == Further Reading
-* https://testcontainers.com/guides/testing-spring-boot-kafka-listener-using-testcontainers/[Testing Spring Boot Kafka Listener using Testcontainers]
 * https://testcontainers.com/guides/getting-started-with-testcontainers-for-java/[Getting started with Testcontainers for Java]
+* https://testcontainers.com/guides/testing-spring-boot-kafka-listener-using-testcontainers/[Testing Spring Boot Kafka Listener using Testcontainers]
 * https://www.testcontainers.org/modules/localstack/[Testcontainers LocalStack Module]

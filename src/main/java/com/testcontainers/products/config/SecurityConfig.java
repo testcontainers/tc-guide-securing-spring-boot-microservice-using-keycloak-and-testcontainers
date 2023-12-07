@@ -16,25 +16,24 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 class SecurityConfig {
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http)
-        throws Exception {
-        http
-            .authorizeHttpRequests(c ->
-                c
-                    .requestMatchers(HttpMethod.GET, "/api/products")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/products")
-                    .authenticated()
-                    .anyRequest()
-                    .authenticated()
-            )
-            .sessionManagement(c ->
-                c.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .cors(CorsConfigurer::disable)
-            .csrf(CsrfConfigurer::disable)
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
-        return http.build();
-    }
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+      .authorizeHttpRequests(c ->
+        c
+          .requestMatchers(HttpMethod.GET, "/api/products")
+          .permitAll()
+          .requestMatchers(HttpMethod.POST, "/api/products")
+          .authenticated()
+          .anyRequest()
+          .authenticated()
+      )
+      .sessionManagement(c ->
+        c.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      )
+      .cors(CorsConfigurer::disable)
+      .csrf(CsrfConfigurer::disable)
+      .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+    return http.build();
+  }
 }
