@@ -11,7 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class ContainersConfig {
 
   static String POSTGRES_IMAGE = "postgres:16-alpine";
-  static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:23.0.1";
+  static String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:25.0";
   static String realmImportFile = "/keycloaktcdemo-realm.json";
   static String realmName = "keycloaktcdemo";
 

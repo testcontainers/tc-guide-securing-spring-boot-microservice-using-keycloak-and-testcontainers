@@ -50,7 +50,7 @@ So, once the application is generated, add the following dependencies with *test
 
 [source,groovy]
 ----
-testImplementation 'com.github.dasniko:testcontainers-keycloak:3.2.0'
+testImplementation 'com.github.dasniko:testcontainers-keycloak:3.4.0'
 testImplementation 'io.rest-assured:rest-assured'
 ----
 
@@ -137,7 +137,7 @@ Start the Keycloak server using Docker as follows:
 $ docker run -p 9090:8080 \
     -e KEYCLOAK_ADMIN=admin \
     -e KEYCLOAK_ADMIN_PASSWORD=admin \
-    quay.io/keycloak/keycloak:23.0.1 start-dev
+    quay.io/keycloak/keycloak:25 start-dev
 ----
 
 Now you can go to http://localhost:9090 and login into Admin Console using the credentials *admin/admin*.
@@ -194,7 +194,7 @@ We registered a bean of type *PostgreSQLContainer* and also added *@ServiceConne
 which will start a PostgreSQL container and automatically register the DataSource properties.
 
 Next, we are registering a bean of type *KeycloakContainer* using the Docker image
-*quay.io/keycloak/keycloak:23.0.1* and importing the realm configuration file.
+*quay.io/keycloak/keycloak:25* and importing the realm configuration file.
 Then we are registering the dynamic JWT Issuer URI using *DynamicPropertyRegistry*
 by fetching the AuthServerUrl from the Keycloak container instance.
 
